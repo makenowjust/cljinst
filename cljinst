@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ue
+set -e
 
 # === setup variables ===
 # environment variables
@@ -18,12 +18,21 @@ exitcode=0
 
 # === utility functions ===
 run() {
-  [[ 1 -eq "$verbose" ]] && echo "[VERBOSE] $@"
-  [[ 0 -eq "$dryrun"  ]] && "$@"
+  [[ 1 -eq "$verbose" ]] && echo "[VERBOSE] $@" >/dev/stderr
+  if [[ 0 -eq "$dryrun"  ]]; then
+    "$@" || return $?
+  fi
+}
+
+run-eval() {
+  [[ 1 -eq "$verbose" ]] && echo "[VERBOSE] $@" >/dev/stderr
+  if [[ 0 -eq "$dryrun"  ]]; then
+    eval "$@" || return $?
+  fi
 }
 
 err() {
-  echo $'\e[31m'"[ERROR] $@"$'\e[0m' 2> /dev/stderr
+  echo $'\e[31m'"[ERROR] $@"$'\e[0m' > /dev/stderr
 }
 
 
@@ -80,6 +89,7 @@ cljinst_help() {
   echo "  list         - List of installed clojure versions"
   echo "  list-remote  - List of available clojure versions"
   echo "  install      - Install specified version clojure"
+  echo "  uninstall    - Uninstall specified version clojure"
   echo "  setup        - Set up myself"
   echo "  self-update  - Update myself"
   echo
@@ -89,23 +99,67 @@ cljinst_help() {
 }
 
 cljinst_list() {
-  err "Not implemented!"
+  run-eval "ls '$CLJINST_ROOT/versions' | sort -fr"
 }
 
 cljinst_list-remote() {
-  err "Not implemented!"
+  run-eval "curl $CLJINST_CLOJURE_URL/maven-metadata.xml 2>/dev/null | awk -F '[<>]' '/<version>/{ print \$3}'"
 }
 
 cljinst_install() {
-  err "Not implemented!"
+  # check options
+  ver="${options[0]}"
+  if [[ -z "$ver" ]]; then
+    err "please specify version of clojure to install"
+    exitcode=1; return
+  fi
+
+  if [[ -d "$CLJINST_ROOT/versions/$ver" && -f "$CLJINST_ROOT/versions/$ver/clojure-${ver}.jar" ]]; then
+    err "clojure $ver is already installed"
+    exitcode=1; return
+  fi
+  [[ ! -d "$CLJINST_ROOT/versions/$ver" ]] && run mkdir -p "$CLJINST_ROOT/versions/$ver"
+  run cd "$CLJINST_ROOT/versions/$ver"
+  [[ ! -d "$CLJINST_ROOT/versions/$ver/clojure-${ver}.jar" ]] && if ! run-eval 'curl -fO "$CLJINST_CLOJURE_URL/$ver/clojure-${ver}.jar" 2>/dev/null'; then
+    err "installing clojure $ver was failure"
+    rm -rf "$CLJINST_ROOT/versions/$ver"
+    exitcode=$?
+  fi
+}
+
+cljinst_uninstall() {
+  # check options
+  ver="${options[0]}"
+  if [[ -z "$ver" ]]; then
+    err "please specify version of clojure to uninstall"
+    exitcode=1; return
+  fi
+
+  if [[ ! -d "$CLJINST_ROOT/versions/$ver" ]]; then
+    err "clojure $ver have not installed yet"
+    exitcode=1; return
+  fi
+  run rm -rf "$CLJINST_ROOT/versions/$ver"
 }
 
 cljinst_setup() {
-  err "Not implemented!"
+  verbose=1
+  if [[ -d "$CLJINST_ROOT" && -d "$CLJINST_ROOT/versions" ]]; then
+    err "cljinst is already installed"
+    exitcode=1; return
+  fi
+  [[ ! -d "$CLJINST_ROOT" ]] && run git clone "$CLJINST_REPO" "$CLJINST_ROOT"
+  [[ ! -d "$CLJINST_ROOT/versions" ]] && run mkdir "$CLJINST_ROOT/versions"
+
+  echo
+  echo "cljinst is successfully installed."
+  echo "please add the following line into your ~/.bashrc etc:"
+  echo "  export PATH=$CLJINST_ROOT:\$PATH"
 }
 
 cljinst_self-update() {
-  err "Not implemented!"
+  run cd "$CLJINST_ROOT"
+  run git pull
 }
 
 # === running main ===

@@ -15,4 +15,8 @@ if [[ -z "$CLOJURE_VERSION" ]]; then
 fi
 
 # === run clojure ===
-java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "$@"
+java="java"
+if type rlwrap >/dev/null; then
+  java="rlwrap java"
+fi
+$java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "$@"
