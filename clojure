@@ -19,4 +19,11 @@ java="java"
 if type rlwrap >/dev/null 2>/dev/null; then
   java="rlwrap java"
 fi
-$java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "$@"
+options=()
+if [[ -f "$CLJINST_ROOT/init.clj" ]]; then
+  options=(-i $CLJINST_ROOT/init.clj)
+  if [[ -z "$@" ]]; then
+    options=("${options[@]}" -r)
+  fi
+fi
+$java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "${options[@]}" "$@"
