@@ -73,14 +73,14 @@ $ cljinst self-update
 
 Show version.
 
-```
+```bash
 $ cljinst version
 0.1.1
 ```
 
 Show help.
 
-```
+```bash
 $ cljinst help
 Usage:
   cljinst [-vd] <subcommand> [options...]
