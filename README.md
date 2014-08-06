@@ -75,7 +75,7 @@ Show version.
 
 ```bash
 $ cljinst version
-0.1.1
+0.1.2
 ```
 
 Show help.
