@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+# === setup variables ===
+CLJINST_ROOT="${CLJINST_ROOT:-$HOME/.cljinst}"
+if [[ -z "$CLOJURE_VERSION" ]]; then
+  CLOJURE_VERSION="$(ls $CLJINST_ROOT/versions 2>/dev/null | sort -f | head -n1)"
+fi
+
+# === check variables ===
+if [[ -z "$CLOJURE_VERSION" ]]; then
+  echo "clojure is not installed"
+  exit 1
+fi
+
+# === run clojure ===
+java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "$@"

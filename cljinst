@@ -1,0 +1,112 @@
+#!/bin/bash
+
+set -ue
+
+# === setup variables ===
+# environment variables
+CLJINST_ROOT="${CLJINST_ROOT:-$HOME/.cljinst}"
+CLJINST_REPO="${CLJINST_REPO:-https://github.com/MakeNowJust/cljinst.git}"
+CLJINST_CLOJURE_URL="${CLJINST_CLOJURE_URL:-http://central.maven.org/maven2/org/clojure/clojure}"
+
+# local variables
+subcommand=
+options=()
+verbose=0
+dryrun=0
+exitcode=0
+
+
+# === utility functions ===
+run() {
+  [[ 1 -eq "$verbose" ]] && echo "[VERBOSE] $@"
+  [[ 0 -eq "$dryrun"  ]] && "$@"
+}
+
+err() {
+  echo $'\e[31m'"[ERROR] $@"$'\e[0m' 2> /dev/stderr
+}
+
+
+# === parse options ===
+for opt in "$@"; do
+  case "$opt" in
+    "-v" | "--verbose")
+      verbose=1
+      ;;
+    "-d" | "--dryrun")
+      verbose=1
+      dryrun=1
+      ;;
+    *)
+      if [[ -z "$subcommand" ]]; then
+        subcommand="$opt"
+      else
+        options=("${options[@]}" "$opt")
+      fi
+  esac
+done
+
+
+# === main ===
+main() {
+  # check subcommand
+  if [[ -z "$subcommand" ]]; then
+    err "Please specify <subcommand>!"
+    subcommand=help
+    exitcode=1
+  fi
+  if ! declare -f "cljinst_$subcommand" >/dev/null; then
+    err "$subcommand is not <subcommand>!"
+    subcommand=help
+    exitcode=1
+  fi
+  eval "cljinst_$subcommand"
+  exit $exitcode
+}
+
+
+# === subcommands ===
+cljinst_version() {
+  echo "0.1.0"
+}
+
+cljinst_help() {
+  echo "Usage:"
+  echo "  cljinst [-vd] <subcommand> [options...]"
+  echo
+  echo "Subcommands:"
+  echo "  version      - Show cljinst's version"
+  echo "  help         - Show this help"
+  echo "  list         - List of installed clojure versions"
+  echo "  list-remote  - List of available clojure versions"
+  echo "  install      - Install specified version clojure"
+  echo "  setup        - Set up myself"
+  echo "  self-update  - Update myself"
+  echo
+  echo "Global Options:"
+  echo "  -v/--verbose - Display running commands"
+  echo "  -d/--dryrun  - Display commands, but not run"
+}
+
+cljinst_list() {
+  err "Not implemented!"
+}
+
+cljinst_list-remote() {
+  err "Not implemented!"
+}
+
+cljinst_install() {
+  err "Not implemented!"
+}
+
+cljinst_setup() {
+  err "Not implemented!"
+}
+
+cljinst_self-update() {
+  err "Not implemented!"
+}
+
+# === running main ===
+main
