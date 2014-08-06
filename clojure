@@ -16,7 +16,7 @@ fi
 
 # === run clojure ===
 java="java"
-if type rlwrap >/dev/null; then
+if type rlwrap >/dev/null 2>/dev/null; then
   java="rlwrap java"
 fi
 $java -jar "$CLJINST_ROOT/versions/$CLOJURE_VERSION/clojure-${CLOJURE_VERSION}.jar" "$@"
