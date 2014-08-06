@@ -150,6 +150,7 @@ cljinst_setup() {
   fi
   [[ ! -d "$CLJINST_ROOT" ]] && run git clone "$CLJINST_REPO" "$CLJINST_ROOT"
   [[ ! -d "$CLJINST_ROOT/versions" ]] && run mkdir "$CLJINST_ROOT/versions"
+  [[ ! -f "$CLJINST_ROOT/init.clj" ]] && run cp "$CLJINST_ROOT/init.default.clj" "$CLJINST_ROOT/init.clj"
 
   echo
   echo "cljinst is successfully installed."
