@@ -99,7 +99,7 @@ cljinst_help() {
 }
 
 cljinst_list() {
-  run-eval "ls '$CLJINST_ROOT/versions' | sort -fr"
+  run-eval "command ls '$CLJINST_ROOT/versions' | sort -f"
 }
 
 cljinst_list-remote() {

@@ -5,7 +5,7 @@ set -e
 # === setup variables ===
 CLJINST_ROOT="${CLJINST_ROOT:-$HOME/.cljinst}"
 if [[ -z "$CLOJURE_VERSION" ]]; then
-  CLOJURE_VERSION="$(ls $CLJINST_ROOT/versions 2>/dev/null | sort -f | head -n1)"
+  CLOJURE_VERSION="$(command ls $CLJINST_ROOT/versions 2>/dev/null | sort -fr | head -n1)"
 fi
 
 # === check variables ===
